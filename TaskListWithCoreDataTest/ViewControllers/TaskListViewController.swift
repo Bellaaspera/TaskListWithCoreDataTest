@@ -6,11 +6,8 @@
 //
 
 import UIKit
-import CoreData
 
 class TaskListViewController: UITableViewController {
-    
-    private let viewContext = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
     
     private var tasks: [Task] = []
     private let cellID = "taskCell"
@@ -23,6 +20,8 @@ class TaskListViewController: UITableViewController {
         fetchTasks()
     }
 
+// MARK: - Configure NavigationBar
+    
     private func setUpNavigationBar() {
         title = "Task List"
         navigationController?.navigationBar.prefersLargeTitles = true
@@ -47,28 +46,16 @@ class TaskListViewController: UITableViewController {
         showAlert(with: "New task", and: "What do you want to do?", action: "Save")
     }
     
-// MARK: - CoreData
+// MARK: - Work with Storage Manager
     
     private func fetchTasks() {
-        let fetchRequest = Task.fetchRequest()
-        do {
-            try tasks = viewContext.fetch(fetchRequest)
-        } catch let error {
-            print(error.localizedDescription)
-        }
+        tasks = StorageManager.shared.fetch()
     }
    
     private func saveTask(withTitle title: String) {
-        let task = Task(context: viewContext)
+        let task = Task(context: StorageManager.shared.persistentContainer.viewContext)
         task.title = title
-        
-        if viewContext.hasChanges {
-            do {
-                try viewContext.save()
-            } catch let error {
-                print(error.localizedDescription)
-            }
-        }
+        StorageManager.shared.save()
         tasks.append(task)
         let cellIndex = IndexPath(row: tasks.count - 1, section: 0)
         tableView.insertRows(at: [cellIndex], with: .automatic)
@@ -76,27 +63,13 @@ class TaskListViewController: UITableViewController {
     
     private func deleteTask(at index: Int) {
         let task = tasks.remove(at: index)
-        viewContext.delete(task)
-        if viewContext.hasChanges {
-            do {
-                try viewContext.save()
-            } catch let error {
-                print(error.localizedDescription)
-            }
-        }
-        
+        StorageManager.shared.delete(task: task)
     }
     
     private func editTasks(at indexPath: IndexPath, withNewTitle title: String) {
         let task = tasks[indexPath.row]
         task.title = title
-        if viewContext.hasChanges {
-            do {
-                try viewContext.save()
-            } catch let error {
-                print(error.localizedDescription)
-            }
-        }
+        StorageManager.shared.save()
         tableView.reloadRows(at: [indexPath], with: .automatic)
     }
 }
