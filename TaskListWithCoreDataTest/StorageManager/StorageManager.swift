@@ -12,8 +12,10 @@ class StorageManager {
     
     static let shared = StorageManager()
     
-    var persistentContainer: NSPersistentContainer = {
-        
+//MARK: - Core Data Stack
+    
+    private let context: NSManagedObjectContext
+    private let persistentContainer: NSPersistentContainer = {
         let container = NSPersistentContainer(name: "TaskListWithCoreDataTest")
         container.loadPersistentStores(completionHandler: { (storeDescription, error) in
             if let error = error as NSError? {
@@ -23,43 +25,50 @@ class StorageManager {
         return container
     }()
     
-    private init() {}
-    
-    
-    func fetch() -> [Task] {
-        let context = persistentContainer.viewContext
-        let fetchRequest = Task.fetchRequest()
-        var tasks: [Task] = []
-        do {
-            tasks = try context.fetch(fetchRequest)
-        } catch let error {
-            print(error.localizedDescription)
-        }
-        return tasks
+    private init() {
+        context = persistentContainer.viewContext
     }
     
-   func save() {
-        let context = persistentContainer.viewContext
-        if context.hasChanges {
-            do {
-                try context.save()
-            } catch {
-                let nserror = error as NSError
-                fatalError("Unresolved error \(nserror), \(nserror.userInfo)")
-            }
+//MARK: - CRUD
+    
+    func create(taskTitle: String, completion: (Task) -> Void) {
+        let task = Task(context: context)
+        task.title = taskTitle
+        completion(task)
+        saveContext()
+    }
+    
+    func fetch(completion: (Result<[Task], Error>) -> Void) {
+        let fetchRequest = Task.fetchRequest()
+        do {
+            let tasks = try context.fetch(fetchRequest)
+            completion(.success(tasks))
+        } catch let error {
+            completion(.failure(error))
         }
     }
     
     func delete(task: Task) {
-        let context = persistentContainer.viewContext
         context.delete(task)
-        if context.hasChanges {
-            do {
-                try context.save()
-            } catch let error {
-                print(error.localizedDescription)
-            }
-        }
+        saveContext()
     }
+    
+    func update(task: Task, with newTitle: String) {
+        task.title = newTitle
+        saveContext()
+    }
+
+//MARK: - Core Data Saving Support
+    
+    func saveContext() {
+         if context.hasChanges {
+             do {
+                 try context.save()
+             } catch {
+                 let nserror = error as NSError
+                 fatalError("Unresolved error \(nserror), \(nserror.userInfo)")
+             }
+         }
+     }
     
 }

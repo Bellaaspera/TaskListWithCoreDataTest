@@ -14,6 +14,7 @@
 		7006660729F84E9E00305FE6 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 7006660629F84E9E00305FE6 /* Assets.xcassets */; };
 		7006660A29F84E9E00305FE6 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 7006660829F84E9E00305FE6 /* LaunchScreen.storyboard */; };
 		7006661729F87D3600305FE6 /* StorageManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7006661629F87D3600305FE6 /* StorageManager.swift */; };
+		7006661929F9B7C500305FE6 /* Extension UIAlertController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7006661829F9B7C500305FE6 /* Extension UIAlertController.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -26,6 +27,7 @@
 		7006660929F84E9E00305FE6 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		7006660B29F84E9E00305FE6 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		7006661629F87D3600305FE6 /* StorageManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StorageManager.swift; sourceTree = "<group>"; };
+		7006661829F9B7C500305FE6 /* Extension UIAlertController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Extension UIAlertController.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -82,6 +84,7 @@
 			isa = PBXGroup;
 			children = (
 				700665FE29F84E9D00305FE6 /* TaskListViewController.swift */,
+				7006661829F9B7C500305FE6 /* Extension UIAlertController.swift */,
 			);
 			path = ViewControllers;
 			sourceTree = "<group>";
@@ -185,6 +188,7 @@
 				7006661729F87D3600305FE6 /* StorageManager.swift in Sources */,
 				700665FD29F84E9D00305FE6 /* SceneDelegate.swift in Sources */,
 				7006660529F84E9D00305FE6 /* TaskListWithCoreDataTest.xcdatamodeld in Sources */,
+				7006661929F9B7C500305FE6 /* Extension UIAlertController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

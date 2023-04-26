@@ -43,22 +43,28 @@ class TaskListViewController: UITableViewController {
     }
 
     @objc private func addTask() {
-        showAlert(with: "New task", and: "What do you want to do?", action: "Save")
+        showAlert()
     }
     
 // MARK: - Work with Storage Manager
     
     private func fetchTasks() {
-        tasks = StorageManager.shared.fetch()
+        StorageManager.shared.fetch { [unowned self] result in
+            switch result {
+            case .success(let tasks):
+                self.tasks = tasks
+            case .failure(let error):
+                print(error.localizedDescription)
+            }
+        }
     }
    
     private func saveTask(withTitle title: String) {
-        let task = Task(context: StorageManager.shared.persistentContainer.viewContext)
-        task.title = title
-        StorageManager.shared.save()
-        tasks.append(task)
-        let cellIndex = IndexPath(row: tasks.count - 1, section: 0)
-        tableView.insertRows(at: [cellIndex], with: .automatic)
+        StorageManager.shared.create(taskTitle: title) { [unowned self] task in
+            tasks.append(task)
+            let cellIndex = IndexPath(row: tasks.count - 1, section: 0)
+            tableView.insertRows(at: [cellIndex], with: .automatic)
+        }
     }
     
     private func deleteTask(at index: Int) {
@@ -66,41 +72,24 @@ class TaskListViewController: UITableViewController {
         StorageManager.shared.delete(task: task)
     }
     
-    private func editTasks(at indexPath: IndexPath, withNewTitle title: String) {
-        let task = tasks[indexPath.row]
-        task.title = title
-        StorageManager.shared.save()
-        tableView.reloadRows(at: [indexPath], with: .automatic)
-    }
 }
 
 // MARK: - UIAlertController
 
 extension TaskListViewController {
     
-    private func showAlert(with title: String, and message: String, action: String, index: Int? = nil) {
-        let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
+    private func showAlert(with task: Task? = nil, completion: (() -> Void)? = nil) {
+        let title = task != nil ? "Edit Task" : "New Task"
+        let alert = UIAlertController.createAlertController(witTitle: title)
         
-        let saveAction = UIAlertAction(title: "Save", style: .default) { [unowned self] _ in
-            guard let text = alert.textFields?.first?.text, !text.isEmpty else { return }
-            saveTask(withTitle: text)
+        alert.action(task: task) { [weak self] newText in
+            if let task = task, let completion = completion {
+                StorageManager.shared.update(task: task, with: newText)
+                completion()
+            } else {
+                self?.saveTask(withTitle: newText)
+            }
         }
-        
-        let cancelAction = UIAlertAction(title: "Cancel", style: .destructive)
-        
-        let editAction = UIAlertAction(title: "Edit", style: .default) { [unowned self] _ in
-            let cellIndex = IndexPath(row: index ?? 0, section: 0)
-            guard let text = alert.textFields?.first?.text else { return }
-            editTasks(at: cellIndex, withNewTitle: text)
-        }
-        
-        action == "Save" ? alert.addAction(saveAction) : alert.addAction(editAction)
-        alert.addAction(cancelAction)
-        alert.addTextField() { [unowned self] textField in
-            textField.placeholder = action == "Save" ? "New Task" : "Edit task"
-            textField.text = action == "Save" ? "" : tasks[index ?? 0].title
-        }
-        
         present(alert, animated: true)
     }
 }
@@ -129,7 +118,11 @@ extension TaskListViewController {
     }
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        showAlert(with: "Edit Task", and: "What do you wand to change?", action: "Edit", index: indexPath.row)
+        tableView.deselectRow(at: indexPath, animated: true)
+        let task = tasks[indexPath.row]
+        showAlert(with: task) {
+            tableView.reloadRows(at: [indexPath], with: .automatic)
+        }
     }
 }
 
